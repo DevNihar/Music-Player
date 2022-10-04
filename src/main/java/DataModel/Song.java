@@ -2,9 +2,6 @@ package DataModel;
 
 import javafx.beans.property.SimpleStringProperty;
 
-import java.io.File;
-import java.time.Duration;
-
 public class Song {
     private SimpleStringProperty id;
     private SimpleStringProperty songName;

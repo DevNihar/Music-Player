@@ -10,61 +10,73 @@
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TextField?>
-
 <?import javafx.scene.control.Slider?>
 <?import javafx.geometry.Insets?>
+
+
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.nihar_raut.musicplayer.Controller">
     <left>
         <ListView>
-            <Label text="Playlist"/>
-            <Label text="Favourites"/>
+            <Label text="All Songs"/>
+            <Label text="Playlists"/>
+            <Label text="Favourites" onMouseClicked="#handleMouseClicked"/>
             <Label text="Create New Playlist..."/>
         </ListView>
     </left>
     <center>
         <VBox>
-            <TableView VBox.vgrow="ALWAYS">
+            <TableView fx:id="songTableView" VBox.vgrow="ALWAYS">
                 <columnResizePolicy>
                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
                 </columnResizePolicy>
                 <columns>
-                    <TableColumn text="Name" />
-                    <TableColumn text="Duration" />
+                    <TableColumn fx:id="nameColumn" text="Name"/>
+                    <TableColumn fx:id="durationColumn" text="Duration" />
+                    <TableColumn fx:id="artistColumn" text="Artist"/>
                 </columns>
             </TableView>
-            <VBox alignment="CENTER" spacing="10">
+            <VBox fx:id="songBar" alignment="CENTER" spacing="10">
                 <padding>
                     <Insets top="10" right="10" left="10" bottom="10"/>
                 </padding>
                 <HBox alignment="CENTER_RIGHT" spacing="350">
                     <HBox>
                         <GridPane alignment="CENTER" hgap="10" vgap="10">
-                            <Button GridPane.rowIndex="0" GridPane.columnIndex="0">
+                            <Button fx:id="prevButton" GridPane.rowIndex="0" GridPane.columnIndex="0"
+                                    style="-fx-background-radius: 120;
+                                            -fx-pref-width: 40;
+                                            -fx-pref-height: 40">
                                 <graphic>
-                                    <FontIcon iconLiteral="cil-media-step-backward" iconSize="15"/>
+                                    <FontIcon iconLiteral="cil-media-step-backward" iconSize="20"/>
                                 </graphic>
                             </Button>
-                            <Button GridPane.rowIndex="0" GridPane.columnIndex="1" onAction="#handlePlayPause">
+                            <Button fx:id="playPauseButton" GridPane.rowIndex="0" GridPane.columnIndex="1" onAction="#handlePlayPause"
+                                    style="-fx-background-radius: 120;
+                                            -fx-pref-width: 40;
+                                            -fx-pref-height: 40">
                                 <graphic>
-                                    <FontIcon fx:id="play_pause_icon" iconLiteral="cil-media-play" iconSize="15"/>
+                                    <FontIcon fx:id="play_pause_icon" iconLiteral="cil-media-play" iconSize="20"/>
                                 </graphic>
                             </Button>
-                            <Button GridPane.rowIndex="0" GridPane.columnIndex="2">
+                            <Button fx:id="nextButton" GridPane.rowIndex="0" GridPane.columnIndex="2"
+                                    style="-fx-background-radius: 120;
+                                            -fx-pref-width: 40;
+                                            -fx-pref-height: 40">
                                 <graphic>
-                                    <FontIcon iconLiteral="cil-media-step-forward" iconSize="15"/>
+                                    <FontIcon iconLiteral="cil-media-step-forward" iconSize="20"/>
                                 </graphic>
                             </Button>
-                            <!--                    <Slider scaleX="0.3" GridPane.rowIndex="0" GridPane.columnIndex="4"/>-->
                         </GridPane>
                     </HBox>
 
                     <HBox alignment="CENTER_RIGHT">
+                        <Label text="Volume: "/>
                         <Slider />
                     </HBox>
                 </HBox>
-                <Slider fx:id="songSlider" />
+
+                <Slider fx:id="songSlider" maxWidth="800"/>
             </VBox>
         </VBox>
     </center>
