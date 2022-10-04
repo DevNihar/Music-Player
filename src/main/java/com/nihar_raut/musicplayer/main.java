@@ -3,8 +3,11 @@ package com.nihar_raut.musicplayer;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.io.IOException;
 
 public class main extends Application {
@@ -14,6 +17,7 @@ public class main extends Application {
         Scene scene = new Scene(fxmlLoader.load(), 900, 500);
         stage.setTitle("Music Player");
         stage.setScene(scene);
+
         stage.show();
     }
 
