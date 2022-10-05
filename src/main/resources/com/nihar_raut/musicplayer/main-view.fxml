@@ -26,7 +26,7 @@
     </left>
     <center>
         <VBox>
-            <TableView fx:id="songTableView" VBox.vgrow="ALWAYS">
+            <TableView fx:id="songTableView" VBox.vgrow="ALWAYS" onMouseClicked="#handleMouseClicked">
                 <columnResizePolicy>
                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
                 </columnResizePolicy>
@@ -75,8 +75,11 @@
                         <Slider />
                     </HBox>
                 </HBox>
-
-                <Slider fx:id="songSlider" maxWidth="800"/>
+                <HBox alignment="CENTER" prefWidth="1000" spacing="10">
+                    <Label text="0:00"/>
+                    <Slider fx:id="songSlider" prefWidth="700"/>
+                    <Label fx:id="songStopLabel"/>
+                </HBox>
             </VBox>
         </VBox>
     </center>

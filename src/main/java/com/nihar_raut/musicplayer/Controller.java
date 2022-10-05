@@ -11,10 +11,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -39,28 +36,23 @@ public class Controller {
     private VBox songBar;
     @FXML
     private Button playPauseButton;
+    @FXML
+    private Label songStopLabel;
 
     private ObservableList<Song> songs;
     private Map<Integer, MediaPlayer> players;
 
     private String dirPath;
 
-    private boolean isPlaying = false;
-
+    private Song currentSong;
+    private MediaPlayer currentPlayer;
 
     public void initialize(){
         songs = FXCollections.observableArrayList();
         dirPath = "D:\\Projects\\JavaSoftwareProjects\\MusicPlayer\\MusicLibrary";
-
-//        File dir = new File(dirPath);
-//        File[] fileList = dir.listFiles();
-//        File audioFile = fileList[0];
-//        Media media = new Media(new File(audioFile.getAbsolutePath()).toURI().toString());
-//        MediaPlayer mediaPlayer = new MediaPlayer(media);
-////        mediaPlayer.play();
-//        System.out.println("=======================================");
         loadSongs();
         createMediaPlayer();
+        songBar.setDisable(true);
         nameColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Song, String>, ObservableValue<String>>() {
             @Override
             public ObservableValue<String> call(TableColumn.CellDataFeatures<Song, String> songStringCellDataFeatures) {
@@ -87,44 +79,22 @@ public class Controller {
             }
         });
         songTableView.setItems(songs);
+        currentSong = songTableView.getSelectionModel().getSelectedItem();
 
         playPauseButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                Song song = songTableView.getSelectionModel().getSelectedItem();
-                MediaPlayer player = players.get(Integer.parseInt(song.getId()));
+                currentPlayer = players.get(Integer.parseInt(currentSong.getId()));
                 if(play_pause_icon.getIconLiteral().equals("cil-media-play")){
                     play_pause_icon.setIconLiteral("cil-media-pause");
-                    player.play();
+                    currentPlayer.play();
 
                 } else if (play_pause_icon.getIconLiteral().equals("cil-media-pause")) {
                     play_pause_icon.setIconLiteral("cil-media-play");
-                    player.pause();
+                    currentPlayer.pause();
                 }
             }
         });
-//        String file = "MusicLibrary\\Ed Sheeran - Perfect 320kbps(Mobmirchi.in).mp3";
-//
-//        File audioFile = new File(file);
-//        try {
-//            Mp3File mp3File =new Mp3File(audioFile.getPath());
-//            ID3v2 tag = mp3File.getId3v2Tag();
-//            System.out.println(tag.getArtist());
-//            System.out.println(tag.getAlbumArtist());
-//            System.out.println(tag.getLength());
-//            System.out.println(mp3File.getLengthInSeconds()/60 + "  " + mp3File.getLengthInSeconds() % 60);
-//            System.out.println(tag.getTitle());
-//        }catch (IOException e){
-//            e.printStackTrace();
-//        }catch (UnsupportedTagException e){
-//            System.out.println("unsupported tag");
-//        }catch (InvalidDataException e){
-//            System.out.println("Invalid Data");
-//        }
-//
-//        Media media = new Media(audioFile.toURI().toString());
-//        MediaPlayer player =new MediaPlayer(media);
-//        player.play();
     }
 
     public void loadSongs(){
@@ -196,4 +166,9 @@ public class Controller {
         }
     }
 
+    public void handleMouseClicked(){
+        songBar.setDisable(false);
+        currentSong = songTableView.getSelectionModel().getSelectedItem();
+        songStopLabel.setText(currentSong.getDuration());
+    }
 }
