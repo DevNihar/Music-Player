@@ -16,6 +16,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Callback;
+import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 public class Controller {
@@ -36,6 +37,10 @@ public class Controller {
     private VBox songBar;
     @FXML
     private Button playPauseButton;
+    @FXML
+    private Button nextButton;
+    @FXML
+    private Button prevButton;
     @FXML
     private Label songStopLabel;
 
@@ -95,13 +100,45 @@ public class Controller {
                 }
             }
         });
+        nextButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                currentPlayer.pause();
+                currentPlayer.seek(new Duration(0.0));
+                int id = Integer.parseInt(currentSong.getId());
+                id++;
+                if(id > songs.size()){
+                    id = 0;
+                }
+                currentSong = songs.get(id);
+                currentPlayer = players.get(id);
+                songTableView.getSelectionModel().select(id);
+                currentPlayer.play();
+            }
+        });
+        prevButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                currentPlayer.pause();
+                currentPlayer.seek(new Duration(0.0));
+                int id = Integer.parseInt(currentSong.getId());
+                id--;
+                if(id < 0){
+                    id = songs.size();
+                }
+                currentSong = songs.get(id);
+                currentPlayer = players.get(id);
+                songTableView.getSelectionModel().select(id);
+                currentPlayer.play();
+            }
+        });
     }
 
     public void loadSongs(){
         File directory = new File(dirPath);
         File[] files =  directory.listFiles();
         int id = 0;
-        for(File file: files){
+        for(File file:  files){
 //            System.out.println(file.getAbsolutePath());
             String name = file.getName();
 //            System.out.println("Loading: " + name);
@@ -116,8 +153,8 @@ public class Controller {
                     if(tag == null){
                         continue;
                     }
-                    id++;
-//                    System.out.println(id);
+
+                    System.out.println(id);
                     Song newSong = new Song(String.valueOf(id), tag.getTitle()!=null ? tag.getTitle() : "-",
                             formatDuration(mp3File.getLengthInSeconds()),
                             tag.getArtist()!=null ? tag.getArtist(): "-",
@@ -125,6 +162,7 @@ public class Controller {
                             file.getAbsolutePath());
 //                    System.out.println(newSong);
                     songs.add(newSong);
+                    id++;
                 }catch (IOException e){
                     e.printStackTrace();
                 }catch (UnsupportedTagException e){
