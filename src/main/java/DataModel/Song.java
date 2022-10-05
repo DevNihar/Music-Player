@@ -93,4 +93,14 @@ public class Song {
     public void setUrl(String url) {
         this.url.set(url);
     }
+
+    @Override
+    public String toString() {
+        return "{ id: " + this.id.toString() + "\n"
+                + "songName: " + this.songName.toString() + "\n"
+                + "duration: " + this.duration.toString() + "\n"
+                + "artistName: " + this.artistName.toString() + "\n"
+                + "album: " + this.album.toString() + "\n"
+                + "url: " + this.url.toString() + "\n";
+    }
 }

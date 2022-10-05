@@ -8,11 +8,15 @@ import com.mpatric.mp3agic.*;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Callback;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -33,18 +37,30 @@ public class Controller {
     private TableColumn<Song, String> artistColumn;
     @FXML
     private VBox songBar;
+    @FXML
+    private Button playPauseButton;
 
     private ObservableList<Song> songs;
-    private ArrayList<MediaPlayer> players;
+    private Map<Integer, MediaPlayer> players;
 
     private String dirPath;
+
+    private boolean isPlaying = false;
 
 
     public void initialize(){
         songs = FXCollections.observableArrayList();
-        players = new ArrayList<>();
         dirPath = "D:\\Projects\\JavaSoftwareProjects\\MusicPlayer\\MusicLibrary";
+
+//        File dir = new File(dirPath);
+//        File[] fileList = dir.listFiles();
+//        File audioFile = fileList[0];
+//        Media media = new Media(new File(audioFile.getAbsolutePath()).toURI().toString());
+//        MediaPlayer mediaPlayer = new MediaPlayer(media);
+////        mediaPlayer.play();
+//        System.out.println("=======================================");
         loadSongs();
+        createMediaPlayer();
         nameColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Song, String>, ObservableValue<String>>() {
             @Override
             public ObservableValue<String> call(TableColumn.CellDataFeatures<Song, String> songStringCellDataFeatures) {
@@ -71,6 +87,22 @@ public class Controller {
             }
         });
         songTableView.setItems(songs);
+
+        playPauseButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                Song song = songTableView.getSelectionModel().getSelectedItem();
+                MediaPlayer player = players.get(Integer.parseInt(song.getId()));
+                if(play_pause_icon.getIconLiteral().equals("cil-media-play")){
+                    play_pause_icon.setIconLiteral("cil-media-pause");
+                    player.play();
+
+                } else if (play_pause_icon.getIconLiteral().equals("cil-media-pause")) {
+                    play_pause_icon.setIconLiteral("cil-media-play");
+                    player.pause();
+                }
+            }
+        });
 //        String file = "MusicLibrary\\Ed Sheeran - Perfect 320kbps(Mobmirchi.in).mp3";
 //
 //        File audioFile = new File(file);
@@ -100,8 +132,9 @@ public class Controller {
         File[] files =  directory.listFiles();
         int id = 0;
         for(File file: files){
+//            System.out.println(file.getAbsolutePath());
             String name = file.getName();
-            System.out.println("Loading: " + name);
+//            System.out.println("Loading: " + name);
 //            if(name.endsWith("m4a")){
 //                file.delete();
 //            }
@@ -114,12 +147,13 @@ public class Controller {
                         continue;
                     }
                     id++;
-                    System.out.println(id);
+//                    System.out.println(id);
                     Song newSong = new Song(String.valueOf(id), tag.getTitle()!=null ? tag.getTitle() : "-",
                             formatDuration(mp3File.getLengthInSeconds()),
                             tag.getArtist()!=null ? tag.getArtist(): "-",
                             tag.getAlbum()!=null ? tag.getAlbum() : "-",
-                            tag.getUrl());
+                            file.getAbsolutePath());
+//                    System.out.println(newSong);
                     songs.add(newSong);
                 }catch (IOException e){
                     e.printStackTrace();
@@ -132,19 +166,6 @@ public class Controller {
         }
     }
 
-    @FXML
-    public void handlePlayPause(){
-        if(play_pause_icon.getIconLiteral().equals("cil-media-play")){
-            play_pause_icon.setIconLiteral("cil-media-pause");
-        } else if (play_pause_icon.getIconLiteral().equals("cil-media-pause")) {
-            play_pause_icon.setIconLiteral("cil-media-play");
-        }
-    }
-
-    @FXML
-    public void handleMouseClicked(){
-
-    }
 
     public String formatDuration(long duration){
         long seconds = duration;
@@ -163,6 +184,15 @@ public class Controller {
             stringBuilder.append(seconds%60);
 //            System.out.println(stringBuilder);
             return stringBuilder.toString();
+        }
+    }
+
+    public void createMediaPlayer(){
+        players = new HashMap<>();
+        for(Song song: songs){
+            Media media = new Media(new File(song.getUrl()).toURI().toString());
+            MediaPlayer tempPlayer = new MediaPlayer(media);
+            players.put(Integer.parseInt(song.getId()), tempPlayer);
         }
     }
 

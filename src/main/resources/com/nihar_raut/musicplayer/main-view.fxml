@@ -20,7 +20,7 @@
         <ListView>
             <Label text="All Songs"/>
             <Label text="Playlists"/>
-            <Label text="Favourites" onMouseClicked="#handleMouseClicked"/>
+            <Label text="Favourites"/>
             <Label text="Create New Playlist..."/>
         </ListView>
     </left>
@@ -51,7 +51,7 @@
                                     <FontIcon iconLiteral="cil-media-step-backward" iconSize="20"/>
                                 </graphic>
                             </Button>
-                            <Button fx:id="playPauseButton" GridPane.rowIndex="0" GridPane.columnIndex="1" onAction="#handlePlayPause"
+                            <Button fx:id="playPauseButton" GridPane.rowIndex="0" GridPane.columnIndex="1"
                                     style="-fx-background-radius: 120;
                                             -fx-pref-width: 40;
                                             -fx-pref-height: 40">
