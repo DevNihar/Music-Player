@@ -73,12 +73,17 @@
                     <HBox alignment="CENTER_RIGHT">
                         <Label text="Volume: "/>
                         <Slider />
+                        <Button fx:id="muteButton" maxWidth="15" maxHeight="15">
+                            <graphic>
+                                <FontIcon fx:id="muteIcon" iconLiteral="cil-volume-low" iconSize="15"/>
+                            </graphic>
+                        </Button>
                     </HBox>
                 </HBox>
                 <HBox alignment="CENTER" prefWidth="1000" spacing="10">
                     <Label text="0:00"/>
                     <Slider fx:id="songSlider" prefWidth="700"/>
-                    <Label fx:id="songStopLabel"/>
+                    <Label text="--:--" fx:id="songStopLabel"/>
                 </HBox>
             </VBox>
         </VBox>

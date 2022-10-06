@@ -8,6 +8,7 @@ import com.mpatric.mp3agic.*;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -23,6 +24,8 @@ public class Controller {
 
     @FXML
     private FontIcon play_pause_icon;
+    @FXML
+    private FontIcon muteIcon;
     @FXML
     private Slider songSlider;
     @FXML
@@ -42,6 +45,8 @@ public class Controller {
     @FXML
     private Button prevButton;
     @FXML
+    private Button muteButton;
+    @FXML
     private Label songStopLabel;
 
     private ObservableList<Song> songs;
@@ -56,8 +61,10 @@ public class Controller {
         songs = FXCollections.observableArrayList();
         dirPath = "D:\\Projects\\JavaSoftwareProjects\\MusicPlayer\\MusicLibrary";
         loadSongs();
+//        System.out.println(songs.size());
         createMediaPlayer();
         songBar.setDisable(true);
+//        System.out.println(players.size());
         nameColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Song, String>, ObservableValue<String>>() {
             @Override
             public ObservableValue<String> call(TableColumn.CellDataFeatures<Song, String> songStringCellDataFeatures) {
@@ -83,7 +90,16 @@ public class Controller {
                 return songStringCellDataFeatures.getValue().artistNameProperty();
             }
         });
-        songTableView.setItems(songs);
+        SortedList<Song> sortedList = new SortedList<>(songs, new Comparator<Song>() {
+            @Override
+            public int compare(Song o1, Song o2) {
+                int firstId = Integer.parseInt(o1.getId());
+                int secondId = Integer.parseInt(o2.getId());
+                return Integer.compare(firstId, secondId);
+            }
+        });
+        songTableView.setItems(sortedList);
+        songTableView.getSelectionModel().selectFirst();
         currentSong = songTableView.getSelectionModel().getSelectedItem();
 
         playPauseButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -103,33 +119,52 @@ public class Controller {
         nextButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                currentPlayer.pause();
-                currentPlayer.seek(new Duration(0.0));
+                if(currentPlayer != null){
+                    currentPlayer.pause();
+                    currentPlayer.seek(new Duration(0.0));
+                }
                 int id = Integer.parseInt(currentSong.getId());
                 id++;
                 if(id > songs.size()){
-                    id = 0;
+                    id = 1;
                 }
                 currentSong = songs.get(id);
                 currentPlayer = players.get(id);
-                songTableView.getSelectionModel().select(id);
+                songTableView.getSelectionModel().select(id-1);
                 currentPlayer.play();
             }
         });
         prevButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                currentPlayer.pause();
-                currentPlayer.seek(new Duration(0.0));
-                int id = Integer.parseInt(currentSong.getId());
-                id--;
-                if(id < 0){
-                    id = songs.size();
+                if(currentPlayer != null){
+                    currentPlayer.pause();
+                    currentPlayer.seek(new Duration(0.0));
                 }
+                int id = Integer.parseInt(currentSong.getId());
+                System.out.println(id);
+                id--;
+                System.out.println(id);
+                if(id <= 0){
+                    id = songs.size() - 1;
+                }
+                System.out.println(id);
                 currentSong = songs.get(id);
                 currentPlayer = players.get(id);
                 songTableView.getSelectionModel().select(id);
                 currentPlayer.play();
+            }
+        });
+        muteButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                if(muteIcon.getIconLiteral().equals("cil-volume-low") || muteIcon.getIconLiteral().equals("cil-volume-high")){
+                    muteIcon.setIconLiteral("cil-volume-off");
+                    currentPlayer.setVolume(0);
+                }else {
+                    muteIcon.setIconLiteral("cil-volume-low");
+                    currentPlayer.setVolume(50);
+                }
             }
         });
     }
@@ -141,11 +176,11 @@ public class Controller {
         for(File file:  files){
 //            System.out.println(file.getAbsolutePath());
             String name = file.getName();
-//            System.out.println("Loading: " + name);
+            System.out.println("Loading: " + name);
 //            if(name.endsWith("m4a")){
 //                file.delete();
 //            }
-            if(name.endsWith("mp3") || name.endsWith("wav")){
+            if(name.endsWith(".mp3") || name.endsWith(".wav")){
 
                 try {
                     Mp3File mp3File =new Mp3File(file.getAbsolutePath());
@@ -153,16 +188,16 @@ public class Controller {
                     if(tag == null){
                         continue;
                     }
-
+                    id++;
                     System.out.println(id);
-                    Song newSong = new Song(String.valueOf(id), tag.getTitle()!=null ? tag.getTitle() : "-",
+                    Song newSong = new Song(String.valueOf(id), tag.getTitle()!=null ? tag.getTitle() : file.getName().replace(".mp3", ""),
                             formatDuration(mp3File.getLengthInSeconds()),
                             tag.getArtist()!=null ? tag.getArtist(): "-",
                             tag.getAlbum()!=null ? tag.getAlbum() : "-",
                             file.getAbsolutePath());
-//                    System.out.println(newSong);
+                    System.out.println(newSong);
                     songs.add(newSong);
-                    id++;
+
                 }catch (IOException e){
                     e.printStackTrace();
                 }catch (UnsupportedTagException e){
