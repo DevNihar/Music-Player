@@ -11,6 +11,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
@@ -48,9 +49,11 @@ public class Controller {
     private Button muteButton;
     @FXML
     private Label songStopLabel;
+    @FXML
+    private ComboBox<String> sortComboBox;
 
     private ObservableList<Song> songs;
-    private Map<Integer, MediaPlayer> players;
+    private Map<String, MediaPlayer> players;
 
     private String dirPath;
 
@@ -64,6 +67,7 @@ public class Controller {
 //        System.out.println(songs.size());
         createMediaPlayer();
         songBar.setDisable(true);
+        sortComboBox.getSelectionModel().select(0);
 //        System.out.println(players.size());
         nameColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Song, String>, ObservableValue<String>>() {
             @Override
@@ -90,22 +94,23 @@ public class Controller {
                 return songStringCellDataFeatures.getValue().artistNameProperty();
             }
         });
-        SortedList<Song> sortedList = new SortedList<>(songs, new Comparator<Song>() {
-            @Override
-            public int compare(Song o1, Song o2) {
-                int firstId = Integer.parseInt(o1.getId());
-                int secondId = Integer.parseInt(o2.getId());
-                return Integer.compare(firstId, secondId);
-            }
-        });
+//        SortedList<Song> sortedList = new SortedList<>(songs, new Comparator<Song>() {
+//            @Override
+//            public int compare(Song o1, Song o2) {
+//                int firstId = Integer.parseInt(o1.getId());
+//                int secondId = Integer.parseInt(o2.getId());
+//                return Integer.compare(firstId, secondId);
+//            }
+//        });
+        SortedList<Song> sortedList= sort();
         songTableView.setItems(sortedList);
         songTableView.getSelectionModel().selectFirst();
-        currentSong = songTableView.getSelectionModel().getSelectedItem();
 
         playPauseButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                currentPlayer = players.get(Integer.parseInt(currentSong.getId()));
+                Song currentSelection = songTableView.getSelectionModel().getSelectedItem();
+                currentPlayer = players.get(currentSelection.getSongName());
                 if(play_pause_icon.getIconLiteral().equals("cil-media-play")){
                     play_pause_icon.setIconLiteral("cil-media-pause");
                     currentPlayer.play();
@@ -123,14 +128,17 @@ public class Controller {
                     currentPlayer.pause();
                     currentPlayer.seek(new Duration(0.0));
                 }
-                int id = Integer.parseInt(currentSong.getId());
+
+                int id = songTableView.getSelectionModel().getSelectedIndex();
                 id++;
-                if(id > songs.size()){
-                    id = 1;
+
+                if(id >= songTableView.getItems().size()){
+                    id = 0;
                 }
-                currentSong = songs.get(id);
-                currentPlayer = players.get(id);
-                songTableView.getSelectionModel().select(id-1);
+                Song currentSelection = songTableView.getItems().get(id);
+                currentSong = currentSelection;
+                currentPlayer = players.get(currentSelection.getSongName());
+                songTableView.getSelectionModel().select(currentSelection);
                 currentPlayer.play();
             }
         });
@@ -141,16 +149,17 @@ public class Controller {
                     currentPlayer.pause();
                     currentPlayer.seek(new Duration(0.0));
                 }
-                int id = Integer.parseInt(currentSong.getId());
+                int id = songTableView.getSelectionModel().getSelectedIndex();
                 System.out.println(id);
                 id--;
                 System.out.println(id);
-                if(id <= 0){
-                    id = songs.size() - 1;
+                if(id < 0){
+                    id = songTableView.getItems().size() - 1;
                 }
+                Song currentSelected = songTableView.getItems().get(id);
                 System.out.println(id);
-                currentSong = songs.get(id);
-                currentPlayer = players.get(id);
+                currentSong = currentSelected;
+                currentPlayer = players.get(currentSelected.getSongName());
                 songTableView.getSelectionModel().select(id);
                 currentPlayer.play();
             }
@@ -176,7 +185,7 @@ public class Controller {
         for(File file:  files){
 //            System.out.println(file.getAbsolutePath());
             String name = file.getName();
-            System.out.println("Loading: " + name);
+//            System.out.println("Loading: " + name);
 //            if(name.endsWith("m4a")){
 //                file.delete();
 //            }
@@ -195,7 +204,7 @@ public class Controller {
                             tag.getArtist()!=null ? tag.getArtist(): "-",
                             tag.getAlbum()!=null ? tag.getAlbum() : "-",
                             file.getAbsolutePath());
-                    System.out.println(newSong);
+//                    System.out.println(newSong);
                     songs.add(newSong);
 
                 }catch (IOException e){
@@ -235,13 +244,52 @@ public class Controller {
         for(Song song: songs){
             Media media = new Media(new File(song.getUrl()).toURI().toString());
             MediaPlayer tempPlayer = new MediaPlayer(media);
-            players.put(Integer.parseInt(song.getId()), tempPlayer);
+            players.put(song.getSongName(), tempPlayer);
         }
     }
 
     public void handleMouseClicked(){
+        System.out.println(songTableView.getItems().size());
+        System.out.println(songTableView.getSelectionModel().getSelectedIndex());
         songBar.setDisable(false);
         currentSong = songTableView.getSelectionModel().getSelectedItem();
         songStopLabel.setText(currentSong.getDuration());
+    }
+
+    public SortedList<Song> sort(){
+        int index = sortComboBox.getSelectionModel().getSelectedIndex();
+        SortedList<Song> tempSortedList = new SortedList<>(songs);
+        if(index == 0){
+            tempSortedList.setComparator(new Comparator<Song>() {
+                @Override
+                public int compare(Song o1, Song o2) {
+                    int firstId = Integer.parseInt(o1.getId());
+                    int secondId = Integer.parseInt(o2.getId());
+                    return Integer.compare(firstId, secondId);
+                }
+            });
+
+        }else {
+            tempSortedList.setComparator(new Comparator<Song>() {
+                @Override
+                public int compare(Song o1, Song o2) {
+                    int firstId = Integer.parseInt(o1.getId());
+                    int secondId = Integer.parseInt(o2.getId());
+                    return Integer.compare(secondId, firstId);
+                }
+            });
+        }
+        return tempSortedList;
+    }
+    public void handleComboBox(){
+        System.out.println("Combo box ran");
+        songTableView.setItems(sort());
+        System.out.println(songTableView.getSortPolicy().toString());
+//        songTableView.setSortPolicy(new Callback<TableView<Song>, Boolean>() {
+//            @Override
+//            public Boolean call(TableView<Song> songTableView) {
+//                return null;
+//            }
+//        });
     }
 }
