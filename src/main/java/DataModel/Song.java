@@ -1,6 +1,9 @@
 package DataModel;
 
 import javafx.beans.property.SimpleStringProperty;
+import javafx.scene.control.Button;
+import javafx.scene.text.Font;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 public class Song {
     private SimpleStringProperty id;
@@ -9,6 +12,7 @@ public class Song {
     private SimpleStringProperty artistName;
     private SimpleStringProperty album;
     private SimpleStringProperty url;
+    private Button inTableButton;
 
     public  Song(String id, String songName, String duration, String artistName, String album, String url){
         this.id =  new SimpleStringProperty(id);
@@ -17,6 +21,9 @@ public class Song {
         this.artistName =  new SimpleStringProperty(artistName);
         this.album =  new SimpleStringProperty(album);
         this.url =  new SimpleStringProperty(url);
+        this.inTableButton = new Button();
+        FontIcon playButtonFont = new FontIcon("cil-media-play");
+        inTableButton.setFont(playButtonFont.getFont());
     }
 
     public Song() {

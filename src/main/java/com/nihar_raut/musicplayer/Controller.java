@@ -114,13 +114,9 @@ public class Controller {
             @Override
             public void handle(ActionEvent actionEvent) {
                 if(!isPlaying){
-                    play_pause_icon.setIconLiteral("cil-media-pause");
                     playSong();
-                    isPlaying = true;
                 }else {
-                    play_pause_icon.setIconLiteral("cil-media-play");
                     pauseSong();
-                    isPlaying = false;
                 }
             }
         });
@@ -309,13 +305,17 @@ public class Controller {
     }
 
     public void playSong(){
+        play_pause_icon.setIconLiteral("cil-media-pause");
         currentSong = songTableView.getSelectionModel().getSelectedItem();
         currentPlayer = players.get(currentSong.getSongName());
         currentPlayer.play();
+        isPlaying = true;
     }
 
     public void pauseSong(){
+        play_pause_icon.setIconLiteral("cil-media-play");
         currentPlayer.pause();
+        isPlaying = false;
     }
 
 }
