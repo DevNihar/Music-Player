@@ -11,7 +11,6 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
@@ -59,6 +58,7 @@ public class Controller {
 
     private Song currentSong;
     private MediaPlayer currentPlayer;
+    private boolean isPlaying;
 
     public void initialize(){
         songs = FXCollections.observableArrayList();
@@ -69,6 +69,7 @@ public class Controller {
         songBar.setDisable(true);
         sortComboBox.getSelectionModel().select(0);
 //        System.out.println(players.size());
+        isPlaying = false;
         nameColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Song, String>, ObservableValue<String>>() {
             @Override
             public ObservableValue<String> call(TableColumn.CellDataFeatures<Song, String> songStringCellDataFeatures) {
@@ -105,22 +106,27 @@ public class Controller {
         SortedList<Song> sortedList= sort();
         songTableView.setItems(sortedList);
         songTableView.getSelectionModel().selectFirst();
+        currentSong = songTableView.getSelectionModel().getSelectedItem();
+        songStopLabel.setText(currentSong.getDuration());
+        currentPlayer = players.get(currentSong.getSongName());
 
         playPauseButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                Song currentSelection = songTableView.getSelectionModel().getSelectedItem();
-                currentPlayer = players.get(currentSelection.getSongName());
-                if(play_pause_icon.getIconLiteral().equals("cil-media-play")){
+                if(!isPlaying){
                     play_pause_icon.setIconLiteral("cil-media-pause");
-                    currentPlayer.play();
-
-                } else if (play_pause_icon.getIconLiteral().equals("cil-media-pause")) {
+                    playSong();
+                    isPlaying = true;
+                }else {
                     play_pause_icon.setIconLiteral("cil-media-play");
-                    currentPlayer.pause();
+                    pauseSong();
+                    isPlaying = false;
                 }
             }
         });
+
+
+
         nextButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
@@ -249,11 +255,27 @@ public class Controller {
     }
 
     public void handleMouseClicked(){
-        System.out.println(songTableView.getItems().size());
-        System.out.println(songTableView.getSelectionModel().getSelectedIndex());
+//        songTableView.getSelectionModel().clearSelection();
         songBar.setDisable(false);
-        currentSong = songTableView.getSelectionModel().getSelectedItem();
-        songStopLabel.setText(currentSong.getDuration());
+//        Song selectedItem = songTableView.getSelectionModel().getSelectedItem();
+//        if(!selectedItem.equals(currentSong)){
+//            currentSong = songTableView.getSelectionModel().getSelectedItem();
+//            songStopLabel.setText(currentSong.getDuration());
+//            System.out.println(selectedItem);
+////            currentPlayer.pause();
+////            currentPlayer.seek(new Duration(0.0));
+//            play_pause_icon.setIconLiteral("cil-media-play");
+//            currentSong = selectedItem;
+//            currentPlayer = players.get(currentSong.getSongName());
+//        }
+//        if(selectedItem != null && !selectedItem.equals(currentSong)) {
+//            currentPlayer.pause();
+//            currentPlayer.seek(new Duration(0.0));
+//            currentSong = selectedItem;
+//            currentPlayer = players.get(currentSong.getSongName());
+//            currentPlayer.play();
+//            play_pause_icon.setIconLiteral("cil-media-pause");
+//        }
     }
 
     public SortedList<Song> sort(){
@@ -284,12 +306,16 @@ public class Controller {
     public void handleComboBox(){
         System.out.println("Combo box ran");
         songTableView.setItems(sort());
-        System.out.println(songTableView.getSortPolicy().toString());
-//        songTableView.setSortPolicy(new Callback<TableView<Song>, Boolean>() {
-//            @Override
-//            public Boolean call(TableView<Song> songTableView) {
-//                return null;
-//            }
-//        });
     }
+
+    public void playSong(){
+        currentSong = songTableView.getSelectionModel().getSelectedItem();
+        currentPlayer = players.get(currentSong.getSongName());
+        currentPlayer.play();
+    }
+
+    public void pauseSong(){
+        currentPlayer.pause();
+    }
+
 }
