@@ -5,8 +5,7 @@ import java.io.IOException;
 import java.util.*;
 import DataModel.Song;
 import com.mpatric.mp3agic.*;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -14,7 +13,6 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -56,10 +54,12 @@ public class Controller {
     private Button prevButton;
     @FXML
     private Button muteButton;
-    @FXML
-    private Button eom;
+//    @FXML
+//    private Button eom;
     @FXML
     private Label songStopLabel;
+    @FXML
+    private Label songStartLabel;
     @FXML
     private Label songNameLabel;
     @FXML
@@ -87,9 +87,6 @@ public class Controller {
         volumeSlider.setMin(0);
         volumeSlider.setMax(100);
         volumeSlider.setValue(50);
-//        volumeSlider.setShowTickMarks(true);
-//        volumeSlider.setMajorTickUnit(25);
-//        volumeSlider.setMinorTickCount(1);
         nameColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Song, String>, ObservableValue<String>>() {
             @Override
             public ObservableValue<String> call(TableColumn.CellDataFeatures<Song, String> songStringCellDataFeatures) {
@@ -157,23 +154,6 @@ public class Controller {
             }
         });
 
-
-
-//        My method
-//        playButtonColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Song, Button>, ObservableValue<Button>>() {
-//            @Override
-//            public ObservableValue<Button> call(TableColumn.CellDataFeatures<Song, Button> songButtonCellDataFeatures) {
-//                songButtonCellDataFeatures.getValue().getPlayButton().setOnAction(new EventHandler<ActionEvent>() {
-//                    @Override
-//                    public void handle(ActionEvent actionEvent) {
-//                        System.out.println(songButtonCellDataFeatures.getTableView().getSelectionModel().getSelectedIndex());
-//                    }
-//                });
-//                return songButtonCellDataFeatures.getValue().playButtonProperty();
-//            }
-//
-//        });
-
         SortedList<Song> sortedList= sort();
         songTableView.setItems(sortedList);
         songTableView.getSelectionModel().selectFirst();
@@ -223,43 +203,33 @@ public class Controller {
             }
         });
 
-//        volumeSlider.valueProperty().addListener(new InvalidationListener() {
-//            @Override
-//            public void invalidated(Observable observable) {
-//                currentPlayer.setVolume(volumeSlider.getValue()/100);
-////                System.out.println(volumeSlider.getValue()/100);
-//            }
-//        });
         volumeSlider.valueProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
                 currentPlayer.setVolume(volumeSlider.getValue()/100);
             }
         });
+
         songSlider.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-//                Tooltip
                 songSlider.addEventHandler(MouseEvent.MOUSE_DRAGGED, new EventHandler<MouseEvent>() {
                     @Override
                     public void handle(MouseEvent mouseEvent) {
-
+                        currentPlayer.pause();
+                        currentPlayer.seek(new Duration(songSlider.getValue()));
                     }
                 });
             }
+
         });
-        songSlider.valueProperty().addListener(new InvalidationListener() {
-            @Override
-            public void invalidated(Observable observable) {
-                
-            }
-        });
-        eom.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                currentPlayer.seek(new Duration(300000));
-            }
-        });
+//        eom.setOnAction(new EventHandler<ActionEvent>() {
+//            @Override
+//            public void handle(ActionEvent actionEvent) {
+//                currentPlayer.seek(new Duration(300000));
+//            }
+//        });
+        updateSongBar();
     }
 
 
@@ -352,10 +322,7 @@ public class Controller {
     }
 
     public void handleMouseClicked(){
-//        System.out.println(songTableView.getSelectionModel().getSelectedIndex());
-//        System.out.println(songTableView.getItems().size());
-        System.out.println(currentSong.getDuration());
-        getMilliFromDuration(currentSong.getDuration());
+
     }
 
     public SortedList<Song> sort(){
@@ -389,8 +356,10 @@ public class Controller {
     }
 
     public void playSong(){
+
         play_pause_icon.setIconLiteral("cil-media-pause");
         currentSong = songTableView.getSelectionModel().getSelectedItem();
+        songSlider.setMax(getMilliFromDuration(currentSong.getDuration()));
         updateSongBarData(currentSong);
         currentPlayer = players.get(currentSong.getSongName());
         currentPlayer.play();
@@ -406,6 +375,7 @@ public class Controller {
     public void nextSong(){
         currentPlayer.seek(new Duration(0.0));
         currentPlayer.pause();
+        songSlider.setValue(0);
 
         int id = songTableView.getSelectionModel().getSelectedIndex();
         id++;
@@ -421,6 +391,7 @@ public class Controller {
     public void prevSong(){
         currentPlayer.seek(new Duration(0.0));
         currentPlayer.pause();
+        songSlider.setValue(0);
 
         int id = songTableView.getSelectionModel().getSelectedIndex();
 //                System.out.println(id);
@@ -436,5 +407,47 @@ public class Controller {
     public void updateSongBarData(Song currentSong){
         songNameLabel.setText(currentSong.getSongName());
         songStopLabel.setText(currentSong.getDuration());
+    }
+
+    public String secToMin(long duration){
+        String time = null;
+        if((duration % 60)< 10){
+            time = duration / 60 + ":0" + duration % 60;
+        }else {
+            time = duration / 60 + ":" + duration % 60;
+        }
+        return time;
+    }
+
+    public void updateSongBar(){
+        Thread updateThread = new Thread(new Runnable() {
+            final Duration duration = new Duration(getMilliFromDuration(currentSong.getDuration()));
+            @Override
+            public void run() {
+                while (isPlaying) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+
+//                          System.out.println(currentPlayer.getCurrentTime());
+                            String currentTime = currentPlayer.getCurrentTime().toString().replace(" ms", "");
+                            songSlider.setValue(Double.parseDouble(currentTime));
+                            Duration tDuration = currentPlayer.getCurrentTime();
+//                            System.out.println(tDuration);
+//                          System.out.println(duration.subtract(tDuration).toSeconds());
+                            songStartLabel.setText(secToMin((long) tDuration.toSeconds()));
+                            songStopLabel.setText(secToMin((long) duration.subtract(tDuration).toSeconds()));
+
+                        }
+                    });
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
+                }
+            }
+        });
+        updateThread.start();
     }
 }

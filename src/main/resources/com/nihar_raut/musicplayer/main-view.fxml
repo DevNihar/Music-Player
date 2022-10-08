@@ -121,10 +121,10 @@
                 <padding>
                     <Insets bottom="10"/>
                 </padding>
-                <Label text="0:00"/>
+                <Label fx:id="songStartLabel" text="0:00"/>
                 <Slider fx:id="songSlider" prefWidth="700"/>
                 <Label text="--:--" fx:id="songStopLabel"/>
-                <Button fx:id="eom"/>
+<!--                <Button fx:id="eom"/>-->
             </HBox>
         </VBox>
     </center>
