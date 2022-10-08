@@ -1,8 +1,13 @@
 package DataModel;
 
+import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.beans.value.ObservableValueBase;
+import javafx.collections.FXCollections;
 import javafx.scene.control.Button;
-import javafx.scene.text.Font;
+import javafx.scene.control.cell.PropertyValueFactory;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 public class Song {
@@ -12,7 +17,7 @@ public class Song {
     private SimpleStringProperty artistName;
     private SimpleStringProperty album;
     private SimpleStringProperty url;
-    private Button inTableButton;
+    private ObservableValue<Button> playButton;
 
     public  Song(String id, String songName, String duration, String artistName, String album, String url){
         this.id =  new SimpleStringProperty(id);
@@ -21,9 +26,12 @@ public class Song {
         this.artistName =  new SimpleStringProperty(artistName);
         this.album =  new SimpleStringProperty(album);
         this.url =  new SimpleStringProperty(url);
-        this.inTableButton = new Button();
-        FontIcon playButtonFont = new FontIcon("cil-media-play");
-        inTableButton.setFont(playButtonFont.getFont());
+        this.playButton = new ObservableValueBase<Button>() {
+            @Override
+            public Button getValue() {
+                return new Button("", new FontIcon("cil-media-play"));
+            }
+        };
     }
 
     public Song() {
@@ -99,6 +107,14 @@ public class Song {
 
     public void setUrl(String url) {
         this.url.set(url);
+    }
+
+    public Button getPlayButton() {
+        return playButton.getValue();
+    }
+
+    public ObservableValue<Button> playButtonProperty() {
+        return playButton;
     }
 
     @Override

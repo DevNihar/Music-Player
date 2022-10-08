@@ -12,8 +12,6 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Slider?>
 <?import javafx.geometry.Insets?>
-
-
 <?import javafx.scene.control.ComboBox?>
 <?import java.lang.String?>
 <?import javafx.collections.FXCollections?>
@@ -55,18 +53,23 @@
                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
                 </columnResizePolicy>
                 <columns>
-                    <TableColumn fx:id="nameColumn" text="Name"/>
-                    <TableColumn fx:id="durationColumn" text="Duration" />
+                    <TableColumn fx:id="playButtonColumn" maxWidth="600"/>
+                    <TableColumn fx:id="nameColumn" text="Name" maxWidth="10000"/>
+                    <TableColumn fx:id="durationColumn" text="Duration" maxWidth="1000"/>
                     <TableColumn fx:id="artistColumn" text="Artist"/>
                 </columns>
             </TableView>
-            <VBox fx:id="songBar" alignment="CENTER" spacing="10">
+            <VBox alignment="CENTER" spacing="10">
                 <padding>
                     <Insets top="10" right="10" left="10" bottom="10"/>
                 </padding>
-                <HBox alignment="CENTER_RIGHT" spacing="350">
-                    <HBox>
+                <HBox alignment="CENTER_RIGHT" >
+<!--                    <HBox alignment="CENTER_RIGHT">-->
+
                         <GridPane alignment="CENTER" hgap="10" vgap="10">
+                            <padding>
+                                <Insets right="300"/>
+                            </padding>
                             <Button fx:id="prevButton" GridPane.rowIndex="0" GridPane.columnIndex="0"
                                     style="-fx-background-radius: 120;
                                             -fx-pref-width: 40;
@@ -92,24 +95,37 @@
                                 </graphic>
                             </Button>
                         </GridPane>
-                    </HBox>
+<!--                    </HBox>-->
 
-                    <HBox alignment="CENTER_RIGHT">
+<!--                    <HBox alignment="CENTER_RIGHT">-->
                         <Label text="Volume: "/>
-                        <Slider />
+                        <Slider fx:id="volumeSlider"/>
                         <Button fx:id="muteButton" maxWidth="15" maxHeight="15">
                             <graphic>
                                 <FontIcon fx:id="muteIcon" iconLiteral="cil-volume-low" iconSize="15"/>
                             </graphic>
                         </Button>
-                    </HBox>
+<!--                    </HBox>-->
                 </HBox>
-                <HBox alignment="CENTER" prefWidth="1000" spacing="10">
-                    <Label text="0:00"/>
-                    <Slider fx:id="songSlider" prefWidth="700"/>
-                    <Label text="--:--" fx:id="songStopLabel"/>
-                </HBox>
+
             </VBox>
+
+            <HBox alignment="CENTER">
+                <padding>
+                    <Insets right="80"/>
+                </padding>
+                <Label fx:id="songNameLabel"/>
+            </HBox>
+
+            <HBox alignment="CENTER" prefWidth="1000" spacing="10">
+                <padding>
+                    <Insets bottom="10"/>
+                </padding>
+                <Label text="0:00"/>
+                <Slider fx:id="songSlider" prefWidth="700"/>
+                <Label text="--:--" fx:id="songStopLabel"/>
+                <Button fx:id="eom"/>
+            </HBox>
         </VBox>
     </center>
 
