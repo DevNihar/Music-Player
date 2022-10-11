@@ -180,12 +180,15 @@ public class Controller {
             @Override
             public void handle(ActionEvent actionEvent) {
                 nextSong();
+                updateSongBar();
+
             }
         });
         prevButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
                 prevSong();
+                updateSongBar();
             }
         });
         muteButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -219,12 +222,6 @@ public class Controller {
 //                currentPlayer.play();
             }
         });
-//        eom.setOnAction(new EventHandler<ActionEvent>() {
-//            @Override
-//            public void handle(ActionEvent actionEvent) {
-//                currentPlayer.seek(new Duration(300000));
-//            }
-//        });
     }
 
 
@@ -250,7 +247,7 @@ public class Controller {
                     id++;
 //                    System.out.println(id);
                     Song newSong = new Song(String.valueOf(id), tag.getTitle()!=null ? tag.getTitle() : file.getName().replace(".mp3", ""),
-                            formatDuration(mp3File.getLengthInSeconds()),
+                            secToMin(mp3File.getLengthInSeconds()),
                             tag.getArtist()!=null ? tag.getArtist(): "-",
                             tag.getAlbum()!=null ? tag.getAlbum() : "-",
                             file.getAbsolutePath());
@@ -269,25 +266,6 @@ public class Controller {
     }
 
 
-    public String formatDuration(long duration){
-        if((duration%60) < 10){
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append(duration/60);
-            stringBuilder.append(":");
-            stringBuilder.append("0");
-            stringBuilder.append(duration%60);
-//            System.out.println(stringBuilder);
-            return stringBuilder.toString();
-        }else {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append(duration/60);
-            stringBuilder.append(":");
-            stringBuilder.append(duration%60);
-//            System.out.println(stringBuilder);
-            return stringBuilder.toString();
-        }
-    }
-
     public void createMediaPlayer(){
         players = new HashMap<>();
         for(Song song: songs){
@@ -300,7 +278,7 @@ public class Controller {
             tempPlayer.setOnEndOfMedia(new Runnable() {
                 @Override
                 public void run() {
-                    System.out.println("calling eom");
+//                    System.out.println("calling eom");
                     nextSong();
                 }
             });
@@ -355,12 +333,11 @@ public class Controller {
         play_pause_icon.setIconLiteral("cil-media-pause");
         currentSong = songTableView.getSelectionModel().getSelectedItem();
         songSlider.setMax(getMilliFromDuration(currentSong.getDuration()));
-        updateSongBarData(currentSong);
         currentPlayer = players.get(currentSong.getSongName());
         currentPlayer.play();
         isPlaying = true;
         updateSongBar();
-
+        updateSongBarData(currentSong);
     }
 
     public void pauseSong(){
@@ -383,6 +360,8 @@ public class Controller {
             id = 0;
         }
         songTableView.getSelectionModel().select(id);
+        currentSong = songTableView.getSelectionModel().getSelectedItem();
+        updateSongBar();
         songTableView.scrollTo(id);
         playSong();
     }
@@ -402,6 +381,8 @@ public class Controller {
             id = songTableView.getItems().size() - 1;
         }
         songTableView.getSelectionModel().select(id);
+        currentSong = songTableView.getSelectionModel().getSelectedItem();
+        updateSongBar();
         songTableView.scrollTo(id);
         playSong();
     }
@@ -442,7 +423,7 @@ public class Controller {
                         }
                     });
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(300);
                     } catch (InterruptedException e) {
                         break;
                     }

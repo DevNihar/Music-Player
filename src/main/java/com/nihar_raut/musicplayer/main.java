@@ -17,7 +17,6 @@ public class main extends Application {
         Scene scene = new Scene(fxmlLoader.load(), 1366, 768);
         stage.setTitle("Music Player");
         stage.setScene(scene);
-
         stage.show();
     }
 
