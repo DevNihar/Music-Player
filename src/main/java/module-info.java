@@ -3,6 +3,7 @@ module com.nihar_raut.musicplayer {
     requires javafx.fxml;
     requires javafx.media;
     requires mp3agic;
+    requires com.jfoenix;
 
     requires org.kordamp.ikonli.javafx;
 

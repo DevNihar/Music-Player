@@ -16,6 +16,7 @@
 <?import java.lang.String?>
 <?import javafx.collections.FXCollections?>
 <?import javafx.scene.control.TextField?>
+<?import com.jfoenix.controls.JFXSlider?>
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.nihar_raut.musicplayer.Controller">
     <left>
@@ -122,7 +123,7 @@
                     <Insets bottom="10"/>
                 </padding>
                 <Label fx:id="songStartLabel" text="0:00"/>
-                <Slider fx:id="songSlider" prefWidth="700"/>
+                <JFXSlider fx:id="songSlider" prefWidth="700"/>
                 <Label text="--:--" fx:id="songStopLabel"/>
 <!--                <Button fx:id="eom"/>-->
             </HBox>

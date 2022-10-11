@@ -23,6 +23,8 @@ import javafx.scene.media.MediaPlayer;
 import javafx.util.Callback;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
+import com.jfoenix.controls.JFXSlider;
+
 
 public class Controller {
 
@@ -31,7 +33,7 @@ public class Controller {
     @FXML
     private FontIcon muteIcon;
     @FXML
-    private Slider songSlider;
+    private JFXSlider songSlider;
     @FXML
     private Slider volumeSlider;
     @FXML
@@ -87,6 +89,7 @@ public class Controller {
         volumeSlider.setMin(0);
         volumeSlider.setMax(100);
         volumeSlider.setValue(50);
+        songSlider.setValue(0);
         nameColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Song, String>, ObservableValue<String>>() {
             @Override
             public ObservableValue<String> call(TableColumn.CellDataFeatures<Song, String> songStringCellDataFeatures) {
@@ -162,7 +165,6 @@ public class Controller {
         currentPlayer = players.get(currentSong.getSongName());
         currentPlayer.seek(new Duration(0.0));
         currentPlayer.setVolume(volumeSlider.getValue()/100);
-
         playPauseButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
@@ -178,11 +180,9 @@ public class Controller {
             @Override
             public void handle(ActionEvent actionEvent) {
                 nextSong();
-
             }
         });
         prevButton.setOnAction(new EventHandler<ActionEvent>() {
-
             @Override
             public void handle(ActionEvent actionEvent) {
                 prevSong();
@@ -213,15 +213,11 @@ public class Controller {
         songSlider.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                songSlider.addEventHandler(MouseEvent.MOUSE_DRAGGED, new EventHandler<MouseEvent>() {
-                    @Override
-                    public void handle(MouseEvent mouseEvent) {
-                        currentPlayer.pause();
-                        currentPlayer.seek(new Duration(songSlider.getValue()));
-                    }
-                });
+                System.out.println(songSlider.getValue());
+//                currentPlayer.pause();
+                currentPlayer.seek(new Duration(songSlider.getValue()));
+//                currentPlayer.play();
             }
-
         });
 //        eom.setOnAction(new EventHandler<ActionEvent>() {
 //            @Override
@@ -229,7 +225,6 @@ public class Controller {
 //                currentPlayer.seek(new Duration(300000));
 //            }
 //        });
-        updateSongBar();
     }
 
 
@@ -364,6 +359,8 @@ public class Controller {
         currentPlayer = players.get(currentSong.getSongName());
         currentPlayer.play();
         isPlaying = true;
+        updateSongBar();
+
     }
 
     public void pauseSong(){
@@ -375,6 +372,8 @@ public class Controller {
     public void nextSong(){
         currentPlayer.seek(new Duration(0.0));
         currentPlayer.pause();
+//        updateSongBarData(currentSong);
+
         songSlider.setValue(0);
 
         int id = songTableView.getSelectionModel().getSelectedIndex();
@@ -392,6 +391,8 @@ public class Controller {
         currentPlayer.seek(new Duration(0.0));
         currentPlayer.pause();
         songSlider.setValue(0);
+//        updateSongBarData(currentSong);
+
 
         int id = songTableView.getSelectionModel().getSelectedIndex();
 //                System.out.println(id);
@@ -421,14 +422,15 @@ public class Controller {
 
     public void updateSongBar(){
         Thread updateThread = new Thread(new Runnable() {
+
             final Duration duration = new Duration(getMilliFromDuration(currentSong.getDuration()));
             @Override
             public void run() {
-                while (isPlaying) {
+                do {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-
+//                            System.out.println("Running thread");
 //                          System.out.println(currentPlayer.getCurrentTime());
                             String currentTime = currentPlayer.getCurrentTime().toString().replace(" ms", "");
                             songSlider.setValue(Double.parseDouble(currentTime));
@@ -437,7 +439,6 @@ public class Controller {
 //                          System.out.println(duration.subtract(tDuration).toSeconds());
                             songStartLabel.setText(secToMin((long) tDuration.toSeconds()));
                             songStopLabel.setText(secToMin((long) duration.subtract(tDuration).toSeconds()));
-
                         }
                     });
                     try {
@@ -445,9 +446,10 @@ public class Controller {
                     } catch (InterruptedException e) {
                         break;
                     }
-                }
+                }while(isPlaying);
             }
         });
+        updateThread.setDaemon(true);
         updateThread.start();
     }
 }
